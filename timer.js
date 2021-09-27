@@ -1,71 +1,107 @@
-const EventEmitter = require('events')
+const EventEmitter = require('events');
+const { runMain } = require('module');
 const moment = require('moment')
+const colors = require('colors')
 
-function parseDate (unparsingDate) {
+const parseDate = ((unparsingDate) => {
   return arrayOfStrings = unparsingDate.split('-');
-}
+})
 
+let timerId = ''
+let timesBetween = 0
 
-function checkNumber (argNum) {
+const checkNumber = ((argNum) => {
   let arrDate = []
 	const arg = process.argv[argNum]
-	const argindex = argNum - 1
 	if (arg === undefined) {
-		console.log(`Аргумент ${argindex} не введен`)	
 		return false
 	}
 
   arrDate = parseDate(arg)
 
-  if (arrDate.length != 4) {
-		console.log(`Формат агумента ${argindex} не соответствует`)  
+  if (arrDate.length != 5) {
     return false  
   } 
 
-
-
   for(let i = 0; i<arrDate.length-1; i++) {
     if (!Number.isInteger(+arrDate[i])) {
-      console.log(`Аргумент ${arrDate[i]} не является числом`)
         return false
       }  
     if (arrDate[i] <= 0) 
       {
-        console.log(`Аргумент ${arrDate[i]} должен быть больше 0`)
         return false
       }    
   }
 
-    // const { hour, day, month, year } = arrDate
-  const year = arrDate[3]
-  const month = arrDate[2]
-  const day = arrDate[1]
+  const year = arrDate[4]
+  const month = arrDate[3]
+  const day = arrDate[2]
+	const minute = arrDate[1]
   const hour = arrDate[0]
 
-  const inputDate = `${year}-${month}-${day} ${hour}:00:00`
-  console.log(`Дата: ${inputDate}`);
+  const inputDate = `${year}-${month}-${day} ${('00' + hour).slice(-2)}:${('00' + minute).slice(-2)}:00`
   if(!moment(inputDate,'YYYY-MM-DD HH:mm:ss').isValid()) {
-    console.log(`Формат даты ${inputDate} не верен`)
     return false      
   } else {
     return inputDate
   }
-	// return true
-}
+})
 
 const endDate = checkNumber(2)
-if (endDate) {end = endDate} else return
-const firstDate = checkNumber(3)
-if (firstDate) {
-  start = firstDate
-} else {
-  start = moment().format('YYYY-MM-DD HH:mm:ss')
+if (endDate) {end = moment(endDate)} else {
+	console.log(`Формат даты должен быть "Часы-Минуты-День-Месяц-Год"`)	
+	return
 }
 
-console.log(end);
-console.log(start);
+const printTimer = (() => {
+	const timesBetweenDays = Math.floor(timesBetween / 60 / 60 / 24)
+	const timesBetweenHour = Math.floor((timesBetween - timesBetweenDays * 24 * 60 * 60) / 60 / 60)
+	const timesBetweenMin = ('00' + (Math.floor((timesBetween - timesBetweenDays * 24 * 60 * 60 - timesBetweenHour * 60 * 60) / 60))).slice(-2)
+	const timesBetweenSec = ('00' + (timesBetween - timesBetweenDays * 24 * 60 * 60 - timesBetweenHour * 60 * 60 - timesBetweenMin * 60)).slice(-2)
 
-const timesBetween = moment.duration(start.diff(end))
+	console.log(colors.green(`Осталось ${timesBetweenDays} дн. ${timesBetweenHour} ч. ${timesBetweenMin} м. ${timesBetweenSec} с.`));	
+})
+
+const emitter = new EventEmitter()
+
+const closeApp = (() => {
+	clearInterval(timerId)
+	console.log(colors.red('Время вышло'));
+	return
+})
+
+const tickTimer = (() => {
+  let firstDate = checkNumber(3)
+	console.clear()
+	if (firstDate) {
+		start = firstDate
+	} else {
+		start = moment().format('YYYY-MM-DD HH:mm:ss')
+	}
+
+	timesBetween = (end.diff(start))/1000
+	if (timesBetween < 1) 
+		emitter.emit('exit')
+	else
+  	emitter.emit('print')
+})
 
 
-console.log(moment.duration(timesBetween).asSeconds());
+class Handler {
+	static print() {
+		printTimer()
+	}
+	static exit() {
+		closeApp()
+	}
+}
+
+const run = (() => {
+	timerId = setInterval(() => tickTimer(), 1000)	
+})
+
+emitter.on('print', Handler.print)
+emitter.on('exit', Handler.exit)
+
+
+run()
