@@ -1,0 +1,23 @@
+{
+  "name": "node_js_lessons",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rasvv/Node_JS_Lessons.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rasvv/Node_JS_Lessons/issues"
+  },
+  "homepage": "https://github.com/rasvv/Node_JS_Lessons#readme",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "moment": "^2.29.1"
+  }
+}
