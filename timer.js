@@ -15,13 +15,13 @@ const parseDate = ((unparsingDate) => {
 })
 
 const parseArgs = () => {
-	for (let i = 2; i<10; i++ ) {
+	for (let i = 2; i < process.argv.length; i++ ) {
 		if (!process.argv[i]) {
 			return
 		} else {
 			const endDate = checkNumber(i) //Проверка полученного аргумента на соответствие формату
 			if (endDate) {end = moment(endDate)} else {
-				console.log(`Формат даты должен быть "Часы-Минуты-День-Месяц-Год"`)
+				console.log(`Формат даты должен быть "Часы-Минуты-Секунды-День-Месяц-Год"`)
 				return
 			}
 		
@@ -32,6 +32,7 @@ const parseArgs = () => {
 
 let timerId = ''
 let timesBetween = 0
+let dateEnd = ''
 
 const checkNumber = ((argNum) => { // Проверка введенного
   let arrDate = []
@@ -42,7 +43,7 @@ const checkNumber = ((argNum) => { // Проверка введенного
 
   arrDate = parseDate(arg)
 
-  if (arrDate.length != 5) {// Проверка, что пришло 5 элементов
+  if (arrDate.length != 6) {// Проверка, что пришло 6 элементов
     return false  
   }
 
@@ -56,8 +57,8 @@ const checkNumber = ((argNum) => { // Проверка введенного
       }
   }
 
-  const [hour, minute, day, month, year]  = arrDate
-	const inputDate = moment(new Date(year, month-1, day, hour, minute, 0))
+  const [hour, minute, second, day, month, year]  = arrDate
+	const inputDate = moment(new Date(year, month-1, day, hour, minute, second))
 
   if(!moment(inputDate,'YYYY-MM-DD HH:mm:ss').isValid()) { //Проверка даты на валидность
     return false      
@@ -66,9 +67,9 @@ const checkNumber = ((argNum) => { // Проверка введенного
   }
 })
 
-const printTimer = ((end) => {
+const printTimer = (() => {
 	const timesBetweens = moment.duration(timesBetween)
-	console.log(colors.green(`Осталось ${timesBetweens.days()} дн. ${timesBetweens.hours()} ч. ${timesBetweens.minutes()} м. ${timesBetweens.seconds()} с.`))
+	console.log(colors.green(`До ${moment(dateEnd).format('HH:mm:ss DD-MM-YYYY')} осталось ${timesBetweens.years()} лет. ${timesBetweens.months()} мес. ${timesBetweens.days()} дн. ${timesBetweens.hours()} ч. ${timesBetweens.minutes()} м. ${timesBetweens.seconds()} с.`))
 })
 
 const emitter = new EventEmitter()
@@ -83,6 +84,8 @@ const tickTimer = ((id, end) => {
 	if (id === 2) {console.clear()}
 		start = moment().format('YYYY-MM-DD HH:mm:ss')
 
+	timerId = id 
+	dateEnd = end
 	timesBetween = (end.diff(start))
 	if (timesBetween < 1) 
 		emitter.emit('exit')
