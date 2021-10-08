@@ -22,7 +22,7 @@ const rl = readline.createInterface({
 
 rl.on('line', (line) => {
 	if (line.startsWith(firstIP)) {firstWriteStream.write(`${line}\n`)}
-	else if (line.startsWith(secondIP)) {secondWriteStream.write(`${line}\n`)}
+	if (line.startsWith(secondIP)) {secondWriteStream.write(`${line}\n`)}
 })
 
 rl.on('error', (error) => console.log(error))
