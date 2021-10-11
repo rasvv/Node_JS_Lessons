@@ -64,67 +64,74 @@ const readerLine = () => {
 }
 
 
-	// const isDir = fileName =>  {
-	// 	return fs.lstatSync(fileName).isDirectory()
-	// }
-
-let listItem = () => {
-	inquirer
-	.prompt([{
-		name: 'fileName',
-		type: 'list',
-		message: 'Choose file:',
-		choices: list,
-	}])
-	.then((answer) => {
-		console.log(executorDir)
-		console.log(answer.fileName)
-		// return answer.fileName
-	})
-}
-
-
-
-const lister = () => {
-	
-
-	if (fs.lstatSync(listItem()).isFile()) {
-		console.log('readerLine')
-		filePath = path.join(executorDir, listItem())
-		readerLine()			
-	} else
-	// if (fs.lstatSync(listItem).isDirectory()) 
-	{
-		executorDir = listItem()
-		list = fs.readdirSync(executorDir)
-		lister()
+	const isDir = fileName =>  {
+		return fs.lstatSync(fileName).isDirectory()
 	}
-}
+
+// let listItem = 
+// 	inquirer
+// 	.prompt([{
+// 		name: 'fileName',
+// 		type: 'list',
+// 		message: 'Choose file:',
+// 		choices: list.forEach(listItem),
+// 	}])
+// 	.then((answer) => {
+// 		console.log(executorDir)
+// 		console.log(answer.fileName)
+// 		answer.fileName
+// 	})
+
+
+// const lister = () => {
+// 	if (fs.lstatSync(listItem).isFile()) {
+// 		console.log('readerLine')
+// 		filePath = path.join(executorDir, listItem())
+// 		readerLine()			
+// 	} //else
+// 	if (fs.lstatSync(listItem).isDir()) 
+// 	{
+// 		executorDir = listItem()
+// 		list = fs.readdirSync(executorDir)
+// 		lister()
+// 	}
+// }
 
 const run = () => {
 	readl.question('Please enter the path: ', dirName => {
 		executorDir = (dirName != '') ? dirName : process.cwd()
 		list = fs.readdirSync(executorDir)
-		// filePath = path.join(executorDir, inputName)
-		// if (dirName != '') {
-		// 	executorDir = dirName
-		// } else {
-		// 	executorDir = process.cwd()
-		// 	// lister()
-		// }
+
+	let listItem = 	inquirer
+		.prompt([{
+			name: 'fileName',
+			type: 'list',
+			message: 'Choose file:',
+			choices: list,
+		}])
+		.then((answer) => {
+			console.log(executorDir)
+			console.log(answer.fileName)
+			answer.fileName
+		})
+
 		readl.question('Enter string to search: ', findStr => {
 			searchingString = (findStr != '') ? findStr : 'GET'
-			lister(() => {
-				console.log(`Количество найденных подстрок1: ${countFinded}`)
-			})
+			if (fs.lstatSync(listItem).isFile()) {
+				console.log('readerLine')
+				filePath = path.join(executorDir, listItem())
+				readerLine()			
+			} //else
+			if (fs.lstatSync(listItem).isDir()) 
+			{
+				executorDir = listItem()
+				list = fs.readdirSync(executorDir)
+				run()
+			}
+			// lister(() => {
+			// 	console.log(`Количество найденных подстрок1: ${countFinded}`)
+			// })
 		})
-		// list = fs.readdirSync(executorDir)
-			// readl.close()
-		// readl.on('close', () => {
-		// 	console.log(`Количество найденных подстрок2: ${countFinded}`)
-		// })
-	// console.log(`Количество найденных подстрок4: ${countFinded}`)
-
 	})
 }
 
