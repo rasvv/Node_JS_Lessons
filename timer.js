@@ -51,13 +51,13 @@ const checkNumber = ((argNum) => { // Проверка введенного
     if (!Number.isInteger(+arrDate[i])) { // Проверка, что это число
         return false
       }
-    if (arrDate[i] <= 0) 
+    if ((arrDate[i] <= 0 && [0,3,4,5].includes(i)) || (arrDate[i] < 0 && [1,2].includes(i)))
       {
         return false
       }
   }
 
-  const [hour, minute, second, day, month, year]  = arrDate
+  const [hour, minute, second, day, month, year] = arrDate
 	const inputDate = moment(new Date(year, month-1, day, hour, minute, second))
 
   if(!moment(inputDate,'YYYY-MM-DD HH:mm:ss').isValid()) { //Проверка даты на валидность
