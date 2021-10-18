@@ -1,55 +1,53 @@
-const fs = require('fs')
-const path = require("path")
+const socket = require('socket.io')
 const http = require('http')
+const fs = require('fs')
+const path = require('path')
+const cluster = require('cluster')
+const os = require('os')
 
-let prevListItems = ''
-
-const run = async () => {
-	const isDir =  (filePath) => fs.lstatSync(filePath).isDirectory()
-
-	http.createServer((req, res) => {
-		const fullPath = path.join(process.cwd(), req.url)
-
-		if (!fs.existsSync(fullPath)) return res.end('File or directory not found')
-			
-			let listItems = ''
-			let	HTML = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf-8')
-			let style = path.join(__dirname, 'style.css')
-
-		if (isDir(fullPath)) {
-			const urlParams = req.url.match(/[\d\w\.]+/gi)
-			if (urlParams) {
-				urlParams.pop()
-				const prevUrl = urlParams.join('/')
-				listItems = urlParams.length ? `<li><a href="/${prevUrl}">...</a></li>` : `<li><a href="/">...</a></li>`
-			}
-			let list = fs.readdirSync(fullPath)
-
-			if (list.length) {
-				list.forEach((listItem) => {
-					const filePath = path.join(req.url, listItem)
-					listItems += `<li><a href='${filePath}'>${listItem}</a></li>`
-				})
-			}
-
-			HTML = HTML
-				.replace('##links', listItems)
-				.replace('##file', '')
-			prevListItems = listItems
-		} else {
-			HTML = HTML
-				.replace('##links', prevListItems)
-				.replace('##file', fs.readFileSync(fullPath).toString())
-		}
-		res.writeHead(200, {
-			'Content-Type': 'text/html',
-		})
-
-		return res.end(HTML)
-
-	}).listen('8082')
+const generateNick = (id) => {
+	// const uppercharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+	const characters = 'abcdefghijklmnopqrstuvwxyz'
+	let result = ''
+	for ( let i = 0; i < 4; i++ ) {
+		 result += characters.charAt(Math.floor(Math.random() * characters.length))
+		 if (i === 0) result = result.toUpperCase()
+	}
+	return id+result;
 }
 
-console.log('Start')
+if (cluster.isMaster) {
+	for ( let i = 0; i < os.cpus().length; i++) {
+		cluster.fork()
+	}
+} else {
+const server = http.createServer((req, res) => {
+    const indexPath = path.join(__dirname, 'index.html')
+    const readStream = fs.createReadStream(indexPath)
+    res.writeHead(200, {
+        'Content-Type': 'text/html'
+    });
+    readStream.pipe(res);
+    // const indexHTML = fs.readFileSync(indexPath);
+    // res.end(indexHTML);
+});
+const io = socket(server);
 
-run()
+io.on('connection', client => {
+    console.log('Connected');
+
+    client.on('client-msg', ({ message }) => {
+        // console.log(data);
+        const data = {
+            message: message.split('').reverse().join(''),
+						nick: generateNick(process.pid),
+        }
+        client.broadcast.emit('server-msg', data)
+        client.emit('server-msg', data)
+    });
+});
+
+console.log(`Worker ${process.pid} is running`)
+
+server.listen(8082)
+}
