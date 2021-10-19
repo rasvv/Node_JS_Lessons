@@ -31,21 +31,23 @@ const server = http.createServer((req, res) => {
     // const indexHTML = fs.readFileSync(indexPath);
     // res.end(indexHTML);
 });
-const io = socket(server);
+
+const io = socket(server)
 
 io.on('connection', client => {
-    console.log('Connected');
+    console.log('Connected')
 
-    client.on('client-msg', ({ message }) => {
+    client.on('client-msg', ({ message, id }) => {
         // console.log(data);
         const data = {
             message: message.split('').reverse().join(''),
 						nick: generateNick(process.pid),
+						id: id,
         }
-        client.broadcast.emit('server-msg', data)
-        client.emit('server-msg', data)
-    });
-});
+        client.broadcast.emit('server-msg', data, id)
+        client.emit('server-msg', data, id)
+    })
+})
 
 console.log(`Worker ${process.pid} is running`)
 
