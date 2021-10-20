@@ -5,22 +5,9 @@ const path = require('path')
 const cluster = require('cluster')
 const os = require('os')
 
-const generateNick = (id) => {
-	// const uppercharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-	const characters = 'abcdefghijklmnopqrstuvwxyz'
-	let result = ''
-	for ( let i = 0; i < 4; i++ ) {
-		 result += characters.charAt(Math.floor(Math.random() * characters.length))
-		 if (i === 0) result = result.toUpperCase()
-	}
-	return id+result;
-}
 
-if (cluster.isMaster) {
-	for ( let i = 0; i < os.cpus().length; i++) {
-		cluster.fork()
-	}
-} else {
+
+
 const server = http.createServer((req, res) => {
     const indexPath = path.join(__dirname, 'index.html')
     const readStream = fs.createReadStream(indexPath)
@@ -30,26 +17,33 @@ const server = http.createServer((req, res) => {
     readStream.pipe(res);
     // const indexHTML = fs.readFileSync(indexPath);
     // res.end(indexHTML);
-});
+})
 
 const io = socket(server)
 
-io.on('connection', client => {
-    console.log('Connected')
 
-    client.on('client-msg', ({ message, id }) => {
-        // console.log(data);
+
+io.on('connection', client => {
+    const sendMessage = (message, nick) => {
         const data = {
-            message: message.split('').reverse().join(''),
-						nick: generateNick(process.pid),
-						id: id,
+            message: message,
+            nick: nick            
         }
-        client.broadcast.emit('server-msg', data, id)
-        client.emit('server-msg', data, id)
+        client.broadcast.emit('server-msg', data)
+        client.emit('server-msg', data)    
+    } 
+    console.log('Connected')
+    // console.log(nick)
+
+
+
+    client.on('client-msg', ({ message, nick }) => {
+        console.log(`I got a message: ${message}`)
+        // sendMessage(message.split('').reverse().join(''))
+        sendMessage(message, nick)
+        if (message != `I'm in chat!`) sendMessage(message.split('').reverse().join(''), 'server')
     })
 })
 
-console.log(`Worker ${process.pid} is running`)
-
 server.listen(8082)
-}
+

@@ -7,53 +7,83 @@
 </head>
 <body>
 	<div class="messageblock">
-		<input class="input" id="input1" type="text" autofocus>
-		<button class="button" id="button1">Send</button>
-		<div class="messages" id="messages1"></div>
+        <p id="usernick"> Автор </p>
+		<input class="input" id="input" type="text" autofocus>
+		<button class="button" id="button">Send</button>
+		<div class="messages" id="messages"></div>
 	</div>
 
 	<script>
 	    const socket = io('localhost:8082')
 	    const messageOutput = document.getElementById('messages')
-	    const sendButton = document.getElementsByClassName('button')
-	    const input = document.getElementsByClassName('input')
+	    const sendButton = document.getElementById('button')
+	    const input = document.getElementById('input')
+	    const userNick = document.getElementById('usernick')
+
+        const generateNick = () => {
+            // const uppercharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+            const characters = 'abcdefghijklmnopqrstuvwxyz'
+            let result = ''
+            for ( let i = 0; i < 4; i++ ) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length))
+                if (i === 0) result = result.toUpperCase()
+            }
+            return result;
+        }
+
+        const nick = generateNick()
+
+        console.log(nick)
+        //  generateNick(process.pid)
+
+        
+        const sendMessage = (message) => {
+            const data = {
+                message: message,
+                nick,
+            }
+            // socket.broadcast.emit('client-msg', data)
+            socket.emit('client-msg', data)    
+        } 
 
 
-			console.log(sendButton);
 
-
-     socket.on('connect', () => {
-	        console.log('connected')
+        socket.on('connect', () => {
+	        console.log('Client connected')
+            userNick.innerHTML = `Автор: ${nick}`
+            sendMessage(`I'm in chat!`)
 	    });
-			
-	    socket.emit('client-msg', 'test');
+
+        socket.on('close', () => {
+            sendMessage(`Goodby!`)
+	    });
+
+	    // socket.emit('client-msg', 'test');
 
 	    sendButton.onclick = () => {
-				console.log('input[id].value '+id +' '+ input[id].value)
-				console.log('messageOutput[id] '+id +' '+ messageOutput[id])
-	        const data = {
-	            message: input[id].value,
-							id: id,
-	        };
+	        console.log('onclick: ' + input.value)
+	        sendMessage(input.value)
 
-	        socket.emit('client-msg', data)
+
+	        // socket.broadcast.emit('client-msg', data)
+            // socket.emit('client-msg', 'test');
 	    }
 
-	    socket.on('server-msg', ({ message, nick, id }) => {
+	    socket.on('server-msg', ({ message, nick }) => {
 				// console.log(messageOutput);
-				// messageOutput[id].insertAdjacentHTML('beforeend', `<p>Сообщение: ${message}</p><p>Автор: ${nick}</p>`)
+				messageOutput.insertAdjacentHTML('beforeend', `<p>Автор: ${nick}</p> <p>Сообщение: ${message}</p>`)
 	    })
 	</script>
 </body>
 <style>
-	body {
+	/* body {
 		display: grid;
 		grid-template-columns: repeat(8, 1fr);
 	}
 	.messages {
 		border: 1px solid #000;
 		height: 50px;
-	}
+	} */
 
 </style>
 </html>
