@@ -11,50 +11,13 @@
 		<button class="button" id="button1">Send</button>
 		<div class="messages" id="messages1"></div>
 	</div>
-	<div class="messageblock">
-		<input class="input" id="input2" type="text" >
-		<button class="button" id="button2">Send</button>
-		<div class="messages" id="messages2"></div>
-	</div>
-	<div class="messageblock">
-		<input class="input" id="input3" type="text" >
-		<button class="button" id="button3">Send</button>
-		<div class="messages" id="messages3"></div>
-	</div>
-	<div class="messageblock">
-		<input class="input" id="input4" type="text" >
-		<button class="button" id="button4">Send</button>
-		<div class="messages" id="messages4"></div>
-	</div>
-	<div class="messageblock">
-		<input class="input" id="input5" type="text" >
-		<button class="button" id="button5">Send</button>
-		<div class="messages" id="messages5"></div>
-	</div>
-	<div class="messageblock">
-		<input class="input" id="input6" type="text" >
-		<button class="button" id="button6">Send</button>
-		<div class="messages" id="messages6"></div>
-	</div>
-	<div class="messageblock">
-		<input class="input" id="input7" type="text" >
-		<button class="button" id="button7">Send</button>
-		<div class="messages" id="messages7"></div>
-	</div>
-	<div class="messageblock">
-		<input class="input" id="input8" type="text">
-		<button class="button" id="button8">Send</button>
-		<div class="messages" id="messages8"></div>
-	</div>
 
 	<script>
 	    const socket = io('localhost:8082')
-	    // const messageOutput = document.getElementById('messages')
-	    const messageOutput = document.querySelectorAll('messages')
-	    // const sendButton = document.getElementsByClassName('button')
-	    const sendButton = document.querySelectorAll('button')
-	    // const input = document.getElementsByClassName('input')
-	    const input = document.querySelectorAll('input')
+	    const messageOutput = document.getElementById('messages')
+	    const sendButton = document.getElementsByClassName('button')
+	    const input = document.getElementsByClassName('input')
+
 
 			console.log(sendButton);
 
@@ -65,23 +28,21 @@
 			
 	    socket.emit('client-msg', 'test');
 
-	    sendButton.forEach((button, id) => {
-				button.onclick = () => {
-					console.log('input[id].value '+id +' '+ input[id].value)
-					console.log('messageOutput[id] '+id +' '+ messageOutput[id])
-		        const data = {
-		            message: input[id].value,
-								id: id,
-		        };
+	    sendButton.onclick = () => {
+				console.log('input[id].value '+id +' '+ input[id].value)
+				console.log('messageOutput[id] '+id +' '+ messageOutput[id])
+	        const data = {
+	            message: input[id].value,
+							id: id,
+	        };
 
-		        socket.emit('client-msg', data)
-		    }
+	        socket.emit('client-msg', data)
+	    }
 
-		    socket.on('server-msg', ({ message, nick, id }) => {
-					// console.log(messageOutput);
-					// messageOutput[id].insertAdjacentHTML('beforeend', `<p>Сообщение: ${message}</p><p>Автор: ${nick}</p>`)
-		    })
-			})
+	    socket.on('server-msg', ({ message, nick, id }) => {
+				// console.log(messageOutput);
+				// messageOutput[id].insertAdjacentHTML('beforeend', `<p>Сообщение: ${message}</p><p>Автор: ${nick}</p>`)
+	    })
 	</script>
 </body>
 <style>
