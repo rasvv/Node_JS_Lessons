@@ -1,12 +1,10 @@
 const socket = require('socket.io')
 const http = require('http')
-const fs = require('fs')
 const path = require('path')
-const cluster = require('cluster')
-const os = require('os')
+const fs = require('fs')
 
-
-
+const clients = [] 
+let clientsCount = 0
 
 const server = http.createServer((req, res) => {
     const indexPath = path.join(__dirname, 'index.html')
@@ -15,31 +13,53 @@ const server = http.createServer((req, res) => {
         'Content-Type': 'text/html'
     });
     readStream.pipe(res);
-    // const indexHTML = fs.readFileSync(indexPath);
-    // res.end(indexHTML);
 })
 
 const io = socket(server)
 
-
+const checkNick = (id) => {
+	let returnNick = ''
+	clients.forEach((client) => {
+		if (client.id === id) returnNick = client.nick
+	})
+	return returnNick
+}
 
 io.on('connection', client => {
     const sendMessage = (message, nick) => {
         const data = {
             message: message,
-            nick: nick            
+            nick: nick, 
+						clientsCount: clientsCount            
         }
         client.broadcast.emit('server-msg', data)
         client.emit('server-msg', data)    
     } 
-    console.log('Connected')
-    // console.log(nick)
 
+    client.on('client-on', (nick) => {
+			if (!checkNick(client.id)) {
+				let newclient = {
+					'id': client.id,
+					'nick': nick
+				}
+				++clientsCount
+				clients.push(newclient)
 
+			}
+			sendMessage(`С нами ${nick}`, 'server')
+		})
 
-    client.on('client-msg', ({ message, nick }) => {
-        console.log(`I got a message: ${message}`)
-        // sendMessage(message.split('').reverse().join(''))
+    client.on('disconnect', () => {
+			--clientsCount
+			const nick = checkNick(client.id)
+			if (nick === '' ) {
+				sendMessage(`Нас покинул кто-то неизвестный`, 'server')
+			} else {
+				sendMessage(`Нас покинул ${nick}`, 'server')
+			}
+		})
+
+		client.on('client-msg', ({ message, nick }) => {
         sendMessage(message, nick)
         if (message != `I'm in chat!`) sendMessage(message.split('').reverse().join(''), 'server')
     })

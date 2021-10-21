@@ -7,7 +7,8 @@
 </head>
 <body>
 	<div class="messageblock">
-        <p id="usernick"> Автор </p>
+    <p id="usernick"> Автор </p>
+    <p id="clientsCount"> Пользователей </p>
 		<input class="input" id="input" type="text" autofocus>
 		<button class="button" id="button">Send</button>
 		<div class="messages" id="messages"></div>
@@ -19,6 +20,7 @@
 	    const sendButton = document.getElementById('button')
 	    const input = document.getElementById('input')
 	    const userNick = document.getElementById('usernick')
+	    const clientscount = document.getElementById('clientsCount')
 
         const generateNick = () => {
             // const uppercharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -32,10 +34,6 @@
         }
 
         const nick = generateNick()
-
-        console.log(nick)
-        //  generateNick(process.pid)
-
         
         const sendMessage = (message) => {
             const data = {
@@ -46,44 +44,31 @@
             socket.emit('client-msg', data)    
         } 
 
-
-
         socket.on('connect', () => {
-	        console.log('Client connected')
-            userNick.innerHTML = `Автор: ${nick}`
-            sendMessage(`I'm in chat!`)
+	        // console.log('Client connected')
+            userNick.innerHTML = `Текущий пользователь: <b>${nick}</b>`
+						socket.emit('client-on', nick)  
 	    });
 
         socket.on('close', () => {
-            sendMessage(`Goodby!`)
+					socket.emit('client-off', nick)  
 	    });
-
-	    // socket.emit('client-msg', 'test');
 
 	    sendButton.onclick = () => {
 	        console.log('onclick: ' + input.value)
 	        sendMessage(input.value)
-
-
-	        // socket.broadcast.emit('client-msg', data)
-            // socket.emit('client-msg', 'test');
 	    }
 
-	    socket.on('server-msg', ({ message, nick }) => {
-				// console.log(messageOutput);
-				messageOutput.insertAdjacentHTML('beforeend', `<p>Автор: ${nick}</p> <p>Сообщение: ${message}</p>`)
-	    })
+	    socket.on('server-msg', ({ message, nick, clientsCount }) => {
+				console.log('clientsCount ' +clientsCount);
+				messageOutput.insertAdjacentHTML('beforeend', `<p>${new Date().toLocaleTimeString()} Автор: <b>${nick}</b> Сообщение: <b>${message}</b></p>`)
+				clientscount.innerHTML = `Пользователей в чате: <b>${clientsCount}</b>`
+			})
 	</script>
 </body>
 <style>
-	/* body {
-		display: grid;
-		grid-template-columns: repeat(8, 1fr);
+	b {
+		font-weight: bold;
 	}
-	.messages {
-		border: 1px solid #000;
-		height: 50px;
-	} */
-
 </style>
 </html>
