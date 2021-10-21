@@ -40,27 +40,19 @@
                 message: message,
                 nick,
             }
-            // socket.broadcast.emit('client-msg', data)
             socket.emit('client-msg', data)    
         } 
 
         socket.on('connect', () => {
-	        // console.log('Client connected')
             userNick.innerHTML = `Текущий пользователь: <b>${nick}</b>`
 						socket.emit('client-on', nick)  
 	    });
 
-        socket.on('close', () => {
-					socket.emit('client-off', nick)  
-	    });
-
 	    sendButton.onclick = () => {
-	        console.log('onclick: ' + input.value)
 	        sendMessage(input.value)
 	    }
 
 	    socket.on('server-msg', ({ message, nick, clientsCount }) => {
-				console.log('clientsCount ' +clientsCount);
 				messageOutput.insertAdjacentHTML('beforeend', `<p>${new Date().toLocaleTimeString()} Автор: <b>${nick}</b> Сообщение: <b>${message}</b></p>`)
 				clientscount.innerHTML = `Пользователей в чате: <b>${clientsCount}</b>`
 			})
