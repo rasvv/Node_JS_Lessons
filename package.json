@@ -1,0 +1,32 @@
+{
+  "name": "node_js_lessons",
+  "version": "1.0.0",
+  "description": "",
+  "main": "cli.js",
+  "devDependencies": {
+    "nodemon": "^2.0.14"
+  },
+  "scripts": {
+    "start": "node cli.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rasvv/Node_JS_Lessons.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rasvv/Node_JS_Lessons/issues"
+  },
+  "homepage": "https://github.com/rasvv/Node_JS_Lessons#readme",
+  "dependencies": {
+    "inquirer": "^8.2.0",
+    "socket.io": "^4.3.1",
+    "yargs": "^17.2.1"
+  },
+  "bin": {
+    "reader": "cli.js"
+  }
+}
